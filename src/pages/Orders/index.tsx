@@ -10,7 +10,7 @@ import {
   HeaderTitle,
   FoodsContainer,
   FoodList,
-  Food,
+  Food as Order,
   FoodImageContainer,
   FoodContent,
   FoodTitle,
@@ -18,7 +18,7 @@ import {
   FoodPricing,
 } from './styles';
 
-interface Food {
+interface Order {
   id: number;
   name: string;
   description: string;
@@ -28,14 +28,18 @@ interface Food {
 }
 
 const Orders: React.FC = () => {
-  const [orders, setOrders] = useState<Food[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
-    async function loadOrders(): Promise<void> {
-      // Load orders from API
-    }
+    api.get<Order[]>('orders').then(({ data }) => {
+      const formattedOrders: Order[] = data.map(order => {
+        return Object.assign(order, {
+          formattedPrice: formatValue(order.price),
+        });
+      });
 
-    loadOrders();
+      setOrders(formattedOrders);
+    });
   }, []);
 
   return (
@@ -49,7 +53,7 @@ const Orders: React.FC = () => {
           data={orders}
           keyExtractor={item => String(item.id)}
           renderItem={({ item }) => (
-            <Food key={item.id} activeOpacity={0.6}>
+            <Order key={item.id} activeOpacity={0.6}>
               <FoodImageContainer>
                 <Image
                   style={{ width: 88, height: 88 }}
@@ -61,7 +65,7 @@ const Orders: React.FC = () => {
                 <FoodDescription>{item.description}</FoodDescription>
                 <FoodPricing>{item.formattedPrice}</FoodPricing>
               </FoodContent>
-            </Food>
+            </Order>
           )}
         />
       </FoodsContainer>
